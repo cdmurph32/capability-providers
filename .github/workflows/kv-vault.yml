@@ -56,12 +56,15 @@ jobs:
   build_artifact:
     needs: [ rust_check, make_test ]
     # run on tag push or manual with 'y'
-    if: ${{ ( startswith(github.ref, 'refs/tags/') || github.events.inputs.artifact == 'y' || github.events.inputs.release == 'y' ) }}
+    if: ${{ true }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: wasmcloud/common-actions/install-wash@main
       - uses: wasmcloud/common-actions/install-cross@main
+
+      - name: debug env vars
+        run: env | grep -v WASH_ISSUER_KEY | grep -v WASH_SUBJECT_KEY && echo "\$HOME = $HOME" && echo "\$XDG_CACHE_HOME = $XDG_CACHE_HOME" && ls -al $HOME/.cache
 
       - name: Build full provider archive
         run: make par-full
@@ -74,7 +77,7 @@ jobs:
           path: ${{ env.working-directory }}/build/*.par.gz
 
   github_release:
-    if: ${{ ( startswith(github.ref, 'refs/tags/') || github.events.inputs.artifact == 'y' || github.events.inputs.release == 'y' ) }}
+    if: ${{ false }}
     needs: build_artifact
     runs-on: ubuntu-latest
     steps:
@@ -94,7 +97,7 @@ jobs:
 
   artifact_release:
     needs: build_artifact
-    if: ${{ ( startswith(github.ref, 'refs/tags/') || github.events.inputs.artifact == 'y' ) }}
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
