@@ -31,32 +31,30 @@ env:
   oci-repository: kv-vault
 
 jobs:
-  rust_check:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - id: rust-check-action
-      uses: wasmcloud/common-actions/rust-check@main
-      with:
-        working-directory: ${{ env.working-directory }}
-        # disable testing with "cargo test" since this will run 'make test'
-        test-options: --no-run
+  # rust_check:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - id: rust-check-action
+  #     uses: wasmcloud/common-actions/rust-check@main
+  #     with:
+  #       working-directory: ${{ env.working-directory }}
+  #       # disable testing with "cargo test" since this will run 'make test'
+  #       test-options: --no-run
 
-  make_test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - id: run-nats
-      uses: wasmcloud/common-actions/run-nats@main
-    - name: Run tests via Makefile
-      run: make test
-      shell: bash
-      working-directory: ${{ env.working-directory }}
+  # make_test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - id: run-nats
+  #     uses: wasmcloud/common-actions/run-nats@main
+  #   - name: Run tests via Makefile
+  #     run: make test
+  #     shell: bash
+  #     working-directory: ${{ env.working-directory }}
 
   build_artifact:
-    needs: [ rust_check, make_test ]
     # run on tag push or manual with 'y'
-    if: ${{ ( startswith(github.ref, 'refs/tags/') || github.events.inputs.artifact == 'y' || github.events.inputs.release == 'y' ) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -67,14 +65,14 @@ jobs:
         run: make par-full
         working-directory: ${{ env.working-directory }}
       
-      - name: Upload provider archive to GH Actions
-        uses: actions/upload-artifact@v2
-        with:
-          name: provider-archive
-          path: ${{ env.working-directory }}/build/*.par.gz
+      # - name: Upload provider archive to GH Actions
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: provider-archive
+      #     path: ${{ env.working-directory }}/build/*.par.gz
 
   github_release:
-    if: ${{ ( startswith(github.ref, 'refs/tags/') || github.events.inputs.artifact == 'y' || github.events.inputs.release == 'y' ) }}
+    if: ${{ false }}
     needs: build_artifact
     runs-on: ubuntu-latest
     steps:
@@ -94,7 +92,7 @@ jobs:
 
   artifact_release:
     needs: build_artifact
-    if: ${{ ( startswith(github.ref, 'refs/tags/') || github.events.inputs.artifact == 'y' ) }}
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
